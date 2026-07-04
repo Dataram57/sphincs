@@ -1,0 +1,26 @@
+{
+    "name": "@dataram57/sphincs",
+    "version": "1.0.0",
+    "description": " bla bla bla",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Dataram57/sphincs.git"
+    },
+    "keywords": [],
+    "author": "dataram57",
+    "license": "ISC",
+    "type": "commonjs",
+    "bugs": {
+        "url": "https://github.com/Dataram57/sphincs/issues"
+    },
+    "homepage": "https://github.com/Dataram57/sphincs#readme",
+    "devDependencies": {
+        "@types/node": "^26.1.0",
+        "tsx": "^4.23.0",
+        "typescript": "^6.0.3"
+    }
+}
