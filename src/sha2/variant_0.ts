@@ -1,80 +1,9 @@
 import { ADRS } from "../adrs.js";
 import { VariantTools } from "../sphincs.js";
-import { createHash } from "node:crypto";
-
-function sha256(...chunks: Uint8Array[]): Uint8Array {
-    const h = createHash("sha256");
-
-    for (const c of chunks) {
-        h.update(c);
-    }
-
-    return new Uint8Array(h.digest());
-}
-
-function sha512(...chunks: Uint8Array[]): Uint8Array {
-    const h = createHash("sha512");
-
-    for (const c of chunks) {
-        h.update(c);
-    }
-
-    return new Uint8Array(h.digest());
-}
-
-const EMPTY = new Uint8Array(0);
-
-function uint8ArrayToBigInt(arr : Uint8Array) : bigint{
-    let v = 0n;
-    for (const b of arr)
-        v = (v << 8n) | BigInt(b);
-    return v;
-}
-
-//Adds 2 additional bytes at start to the message
-function adjustMessage(msg: Uint8Array, ctx: Uint8Array = EMPTY): Uint8Array {
-    if (ctx.length > 255) throw new RangeError('context should be 255 bytes or less');
-    const out = new Uint8Array(2 + ctx.length + msg.length);
-    out[0] = 0;
-    out[1] = ctx.length;
-    out.set(ctx, 2);
-    out.set(msg, 2 + ctx.length);
-    return out;
-}
+import { adjustMessage, mgf1Sha256, sha256, sha512, uint8ArrayToBigInt } from "./common.js";
 
 
-//================================================================
-//#region SHA2 variations
-
-// I2OSP: encode a non-negative integer as a big-endian byte string of given length
-function i2osp(value: number, length: number): Uint8Array {
-    const arr = new Uint8Array(length);
-    for (let i = length - 1; i >= 0; i--) {
-        arr[i] = value & 0xff;
-        value = value >>> 8;
-    }
-    return arr;
-}
-
-
-// MGF1 mask generation function, built on SHA-512 (used for Hmsg when n = 24 or 32)
-function mgf1Sha512(seed: Uint8Array, length: number): Uint8Array {
-    const out = new Uint8Array(length);
-    let outOffset = 0;
-    let counter = 0;
-    while (outOffset < length) {
-        const block = sha512(seed, i2osp(counter, 4));
-        const toCopy = Math.min(block.length, length - outOffset);
-        out.set(block.subarray(0, toCopy), outOffset);
-        outOffset += toCopy;
-        counter++;
-    }
-    return out;
-}
-
-//#endregion
-
-export class SHA2_VariantTools implements VariantTools {
+export class Sha2_VariantTools_1 implements VariantTools {
     //SPHINCS params
     public N : number; //hash length
     public H : number; //Whole Hyper Tree addressing
@@ -87,11 +16,11 @@ export class SHA2_VariantTools implements VariantTools {
     constructor(
         //params
         N : number = 32,
-        H : number = 64,
-        D : number = 8,
-        W : number = 16,
-        K : number = 22,
-        A : number = 14,
+        H : number = 0,
+        D : number = 0,
+        W : number = 0,
+        K : number = 0,
+        A : number = 0,
     ){
         //params
         this.N = N;
@@ -102,7 +31,9 @@ export class SHA2_VariantTools implements VariantTools {
         this.A = A;
     }
 
+    //section 11.2.1
 
+    //TODO: USE HMAC
     HASH_PRF_MSG(skPrf: Uint8Array, opt_rand : Uint8Array, message : Uint8Array) : Uint8Array{
     
         //SLH-DSA Using SHA2 for Security Categories 3 and 5
@@ -113,38 +44,22 @@ export class SHA2_VariantTools implements VariantTools {
     
     //PRF
     HASH_PRF(skSeed: Uint8Array, pkSeed : Uint8Array, adrs : ADRS) : Uint8Array{
-    
-        //SLH-DSA Using SHA2 for Security Categories 3 and 5
-    
-        // PRFaddr: SHA-256(pkSeed || 0^32 || adrs_c || skSeed)
-        return sha256(pkSeed, new Uint8Array(this.N), adrs.bytes(), skSeed);
+        return sha256(pkSeed, new Uint8Array(64 - this.N), adrs.bytes(), skSeed).subarray(0, this.N);
     }
     
     //F
     HASH_F(pkSeed : Uint8Array, adrs : ADRS, input : Uint8Array) : Uint8Array{
-    
-        //SLH-DSA Using SHA2 for Security Categories 3 and 5
-    
-        // F (thash1): SHA-256(pkSeed || 0^32 || adrs_c || input)
-        return sha256(pkSeed, new Uint8Array(this.N), adrs.bytes(), input);
+        return sha256(pkSeed, new Uint8Array(64 - this.N), adrs.bytes(), input).subarray(0, this.N);
     }
     
     //T
     HASH_T(pkSeed : Uint8Array, adrs: ADRS, chunks: Uint8Array[]) : Uint8Array{
-    
-        //SLH-DSA Using SHA2 for Security Categories 3 and 5
-    
-        // T_l (thashN): SHA-512(pkSeed || 0^96 || adrs_c || ...chunks)[0..N]
-        return sha512(pkSeed, new Uint8Array(3 * this.N), adrs.bytes(), ...chunks).subarray(0, this.N);
+        return sha256(pkSeed, new Uint8Array(64 - this.N), adrs.bytes(), ...chunks).subarray(0, this.N);
     }
     
     //H
     HASH_H(pkSeed : Uint8Array, adrs: ADRS, left: Uint8Array, right: Uint8Array) : Uint8Array{
-    
-        //SLH-DSA Using SHA2 for Security Categories 3 and 5
-        
-        // H (thashN with 2 blocks): SHA-512(pkSeed || 0^96 || adrs_c || left || right)[0..N]
-        return sha512(pkSeed, new Uint8Array(3 * this.N), adrs.bytes(), left, right).subarray(0, this.N);
+        return sha256(pkSeed, new Uint8Array(64 - this.N), adrs.bytes(), left, right).subarray(0, this.N);
     }
 
     hashMessage(message: Uint8Array, pkSeed: Uint8Array, pkRoot: Uint8Array, R: Uint8Array){
@@ -167,7 +82,7 @@ export class SHA2_VariantTools implements VariantTools {
 
         //================================================================
         // Inner hash: SHA-512(R || PK.seed || PK.root || M)
-        const inner = sha512(R, pkSeed, pkRoot, message);
+        const inner = sha256(R, pkSeed, pkRoot, message);
 
         //SHA2 variations
         //Ref: Page 46
@@ -178,7 +93,7 @@ export class SHA2_VariantTools implements VariantTools {
         mgfSeed.set(pkSeed, R.length);
         mgfSeed.set(inner, R.length + pkSeed.length);
 
-        const digest = mgf1Sha512(mgfSeed, m);
+        const digest = mgf1Sha256(mgfSeed, m);
         //================================================================
 
         //read stuff from digest
@@ -206,4 +121,3 @@ export class SHA2_VariantTools implements VariantTools {
     }
     
 }
-

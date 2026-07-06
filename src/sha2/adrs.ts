@@ -1,6 +1,6 @@
 import { ADRS, AdrType } from "../adrs.js";
 
-export class SHA2_ADRS implements ADRS {
+export class AdrsCompressed implements ADRS {
     buf = new Uint8Array(22);
     private view = new DataView(this.buf.buffer);
 
@@ -54,7 +54,7 @@ export class SHA2_ADRS implements ADRS {
     }
 
     copy(): ADRS {
-        const a = new SHA2_ADRS();
+        const a = new AdrsCompressed();
         a.buf.set(this.buf);
         return a;
     }
