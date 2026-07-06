@@ -11,7 +11,9 @@ export class Sha2_VariantTools_1 implements VariantTools {
     public W : number; //Winternitz
     public K : number; //How many FORS trees
     public A : number; //How many levels 1 FORS tree has.
-
+    
+    //MGF params
+    M : number;
 
     constructor(
         //params
@@ -21,6 +23,8 @@ export class Sha2_VariantTools_1 implements VariantTools {
         W : number = 0,
         K : number = 0,
         A : number = 0,
+        //MGF params
+        M : number = 0
     ){
         //params
         this.N = N;
@@ -29,6 +33,7 @@ export class Sha2_VariantTools_1 implements VariantTools {
         this.W = W;
         this.K = K;
         this.A = A;
+        this.M = M;
     }
 
     //section 11.2.1
@@ -62,11 +67,12 @@ export class Sha2_VariantTools_1 implements VariantTools {
         return sha256(pkSeed, new Uint8Array(64 - this.N), adrs.bytes(), left, right).subarray(0, this.N);
     }
 
-    hashMessage(message: Uint8Array, pkSeed: Uint8Array, pkRoot: Uint8Array, R: Uint8Array){
+    HASH_MSG(message: Uint8Array, pkSeed: Uint8Array, pkRoot: Uint8Array, R: Uint8Array){
         const H = this.H;
         const D = this.D;
         const K = this.K;
         const A = this.A;
+        const m = this.M;
 
         //adjust message
         message = adjustMessage(message);
@@ -78,7 +84,7 @@ export class Sha2_VariantTools_1 implements VariantTools {
         const idxTreeBytes = Math.ceil((H - hPrime) / 8);  // 7 bytes   //all XMSS trees
         const idxLeafBytes = Math.ceil(hPrime / 8);        // 1 byte    //bottom Merkle tree
         //magic m
-        const m = mdBytes + idxTreeBytes + idxLeafBytes;   // 47 bytes total
+        //const m = mdBytes + idxTreeBytes + idxLeafBytes;   // 47 bytes total
 
         //================================================================
         // Inner hash: SHA-512(R || PK.seed || PK.root || M)

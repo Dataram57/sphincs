@@ -18,11 +18,11 @@ export class AdrsCompressed implements ADRS {
     }
 
     setKeyPairAddress(idx: number) {
-        this.buf[13] = idx & 0xff;
+        this.view.setUint32(10, idx >>> 0, false);
     }
-
+    
     getKeyPairAddress(): number {
-        return this.buf[13];
+        return this.view.getUint32(10, false);
     }
 
     // WOTS_HASH: chain address

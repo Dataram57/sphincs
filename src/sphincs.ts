@@ -14,13 +14,16 @@ export interface VariantTools{
     K : number; //How many FORS trees
     A : number; //How many levels 1 FORS tree has.
 
+    //MGF params
+    M : number;
+
     //SPHINCS hashing functions
     HASH_PRF_MSG : (skPrf: Uint8Array, opt_rand : Uint8Array, message : Uint8Array) => Uint8Array;
     HASH_PRF : (skSeed: Uint8Array, pkSeed : Uint8Array, adrs : ADRS) => Uint8Array;
     HASH_F : (pkSeed : Uint8Array, adrs : ADRS, input : Uint8Array) => Uint8Array;
     HASH_T : (pkSeed : Uint8Array, adrs: ADRS, chunks: Uint8Array[]) => Uint8Array;
     HASH_H : (pkSeed : Uint8Array, adrs: ADRS, left: Uint8Array, right: Uint8Array) => Uint8Array;
-    hashMessage : (message: Uint8Array, pkSeed: Uint8Array, pkRoot: Uint8Array, R: Uint8Array) => {
+    HASH_MSG : (message: Uint8Array, pkSeed: Uint8Array, pkRoot: Uint8Array, R: Uint8Array) => {
         md: Uint8Array<ArrayBufferLike>;
         tree: bigint;
         leafIdx: number;
@@ -68,7 +71,7 @@ export class SphincsVariant{
         const pk = splitPK(publicKey, this.vt);
         
         //compute root
-        const {md, leafIdx, tree} = this.vt.hashMessage(message, pk.pkSeed, pk.pkRoot, extractRandomizer(signature, this.vt));
+        const {md, leafIdx, tree} = this.vt.HASH_MSG(message, pk.pkSeed, pk.pkRoot, extractRandomizer(signature, this.vt));
         const forsRoot = getSignatureForsRoot(message, signature, pk.pkSeed, pk.pkRoot, md, tree, leafIdx, this.vt, this.adrsSource);
         const hyperTreeRoot = getHyperTreeRoot(forsRoot, signature, pk.pkSeed, tree, leafIdx, this.vt, this.adrsSource); 
         
@@ -106,14 +109,16 @@ export class SphincsVariant{
 
         //randomizer (uses skPrf)
         //TODO: Repair this hash
-        const R = this.vt.HASH_PRF_MSG(sk.skPrf, randomUint8Array(N), message);
+        //const r : Uint8Array = randomUint8Array(N);
+        const r = new Uint8Array(N);
+        const R = this.vt.HASH_PRF_MSG(sk.skPrf, r, message);
         func_write(R);
 
         //consts
         const hPrime = H / D;
 
         //digest
-        const { md, tree, leafIdx } = this.vt.hashMessage(message, sk.pkSeed, sk.pkRoot, R);
+        const { md, tree, leafIdx } = this.vt.HASH_MSG(message, sk.pkSeed, sk.pkRoot, R);
 
         //fors
         const forsRoot = signFors(func_write, md, tree, leafIdx, sk.skSeed, sk.pkSeed, this.vt, this.adrsSource);

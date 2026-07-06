@@ -11,6 +11,8 @@ export class Sha2_VariantTools_3_5 implements VariantTools {
     public K : number; //How many FORS trees
     public A : number; //How many levels 1 FORS tree has.
 
+    //MGF params
+    M : number;
 
     constructor(
         //params
@@ -20,6 +22,8 @@ export class Sha2_VariantTools_3_5 implements VariantTools {
         W : number = 16,
         K : number = 22,
         A : number = 14,
+        //MGF params
+        M : number = 0
     ){
         //params
         this.N = N;
@@ -28,6 +32,8 @@ export class Sha2_VariantTools_3_5 implements VariantTools {
         this.W = W;
         this.K = K;
         this.A = A;
+        //MGF params
+        this.M = M;
     }
 
     //section 11.2.2
@@ -39,29 +45,30 @@ export class Sha2_VariantTools_3_5 implements VariantTools {
     
     //PRF
     HASH_PRF(skSeed: Uint8Array, pkSeed : Uint8Array, adrs : ADRS) : Uint8Array{
-        return sha256(pkSeed, new Uint8Array(this.N), adrs.bytes(), skSeed).subarray(0, this.N);
+        return sha256(pkSeed, new Uint8Array(64 - this.N), adrs.bytes(), skSeed).subarray(0, this.N);
     }
     
     //F
     HASH_F(pkSeed : Uint8Array, adrs : ADRS, input : Uint8Array) : Uint8Array{
-        return sha256(pkSeed, new Uint8Array(this.N), adrs.bytes(), input).subarray(0, this.N);
+        return sha256(pkSeed, new Uint8Array(64 - this.N), adrs.bytes(), input).subarray(0, this.N);
     }
     
     //T
     HASH_T(pkSeed : Uint8Array, adrs: ADRS, chunks: Uint8Array[]) : Uint8Array{
-        return sha512(pkSeed, new Uint8Array(3 * this.N), adrs.bytes(), ...chunks).subarray(0, this.N);
+        return sha512(pkSeed, new Uint8Array(128 - this.N), adrs.bytes(), ...chunks).subarray(0, this.N);
     }
     
     //H
     HASH_H(pkSeed : Uint8Array, adrs: ADRS, left: Uint8Array, right: Uint8Array) : Uint8Array{
-        return sha512(pkSeed, new Uint8Array(3 * this.N), adrs.bytes(), left, right).subarray(0, this.N);
+        return sha512(pkSeed, new Uint8Array(128 - this.N), adrs.bytes(), left, right).subarray(0, this.N);
     }
 
-    hashMessage(message: Uint8Array, pkSeed: Uint8Array, pkRoot: Uint8Array, R: Uint8Array){
+    HASH_MSG(message: Uint8Array, pkSeed: Uint8Array, pkRoot: Uint8Array, R: Uint8Array){
         const H = this.H;
         const D = this.D;
         const K = this.K;
         const A = this.A;
+        const m = this.M;
 
         //adjust message
         message = adjustMessage(message);
@@ -73,7 +80,7 @@ export class Sha2_VariantTools_3_5 implements VariantTools {
         const idxTreeBytes = Math.ceil((H - hPrime) / 8);  // 7 bytes   //all XMSS trees
         const idxLeafBytes = Math.ceil(hPrime / 8);        // 1 byte    //bottom Merkle tree
         //magic m
-        const m = mdBytes + idxTreeBytes + idxLeafBytes;   // 47 bytes total
+        //const m = mdBytes + idxTreeBytes + idxLeafBytes;   // 47 bytes total
 
         //================================================================
         // Inner hash: SHA-512(R || PK.seed || PK.root || M)

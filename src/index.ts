@@ -10,55 +10,55 @@ export function hi(): string {
 
 const adrsCompressed = new AdrsCompressed();
 
-//N,H,D,W,K,A
+//N,H,D,W,K,A,M
 
 
 //TODO: turn these exports into JSON objects and not objects.
 
-//SLH-DSA-SHA2-128s         (FAILS)
+//SLH-DSA-SHA2-128s
 export const slh_dsa_sha2_128s = new SphincsVariant(
     new Sha2_VariantTools_1(
-        16,63,7,16,14,12
+        16,63,7,16,14,12,30
     ),
     adrsCompressed
 );
 
-//SLH-DSA-SHA2-128f         (COMPATIBLE WITH NOBLE)
+//SLH-DSA-SHA2-128f
 export const slh_dsa_sha2_128f = new SphincsVariant(
     new Sha2_VariantTools_1(
-        16,66,22,16,33,6
+        16,66,22,16,33,6,34
     ),
     adrsCompressed
 );
 
-//SLH-DSA-SHA2-192s         (FAILS)
+//SLH-DSA-SHA2-192s
 export const slh_dsa_sha2_192s = new SphincsVariant(
     new Sha2_VariantTools_3_5(
-        24,63,7,16,17,14
+        24,63,7,16,17,14,39
     ),
     adrsCompressed
 );
 
-//SLH-DSA-SHA2-192f         (FAILS)
+//SLH-DSA-SHA2-192f
 export const slh_dsa_sha2_192f = new SphincsVariant(
     new Sha2_VariantTools_3_5(
-        24,66,22,16,33,8
+        24,66,22,16,33,8,42
     ),
     adrsCompressed
 );
 
-//SLH-DSA-SHA2-256s         (COMPATIBLE WITH NOBLE)
+//SLH-DSA-SHA2-256s
 export const slh_dsa_sha2_256s = new SphincsVariant(
     new Sha2_VariantTools_3_5(
-        32,64,8,16,22,14
+        32,64,8,16,22,14,47
     ),
     adrsCompressed
 );
 
-//SLH-DSA-SHA2-256f         (COMPATIBLE WITH NOBLE)
+//SLH-DSA-SHA2-256f
 export const slh_dsa_sha2_256f = new SphincsVariant(
     new Sha2_VariantTools_3_5(
-        32,68,17,16,35,9
+        32,68,17,16,35,9,49
     ),
     adrsCompressed
 );
@@ -75,20 +75,16 @@ export const slh_dsa_sha2_256f = new SphincsVariant(
 
 
 
-const sphincs = new SphincsVariant(
-    new Sha2_VariantTools_3_5(),
-    adrsCompressed
-);
 
 
 
 
+/*
 const message = new Uint8Array([3,5]);
 
+const sphincs = slh_dsa_sha2_256s;
 
-const { secretKey, publicKey } = slh_dsa_sha2_256s.keygen();
-console.log(secretKey);
-console.log(publicKey);
-
-//const signature = sphincs.sign(message, secretKey);
-//console.log(sphincs.verify(message, publicKey, signature)); 
+const { secretKey, publicKey } = sphincs.keygen();
+const signature = sphincs.sign(message, secretKey);
+console.log(sphincs.verify(message, publicKey, signature)); 
+*/
