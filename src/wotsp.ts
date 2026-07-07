@@ -95,13 +95,12 @@ export function chainLengths(msg: Uint8Array, vt: VariantTools): number[] {
 }
 
 export function traceWotspPkLeaf(
+    ReadNextHash: () => Uint8Array,
     pkSeed: Uint8Array,
-    wotsSig: Uint8Array,
     msg: Uint8Array,
     adrs: ADRS,
     vt : VariantTools
 ): Uint8Array {
-    const N = vt.N;
     const W = vt.W;
     const { LEN } = getWotspParams(vt);
     
@@ -118,7 +117,7 @@ export function traceWotspPkLeaf(
     const pk : Uint8Array[] = new Array(LEN);
     for (let i = 0; i < LEN; i++) {
         //get hash in chain
-        let node = wotsSig.subarray(i * N, i * N + N);
+        let node = ReadNextHash();
         chainADRS.setChainAddress(i);
         //hash it i times
         for (let f = lengths[i]; f < W - 1; f++) {

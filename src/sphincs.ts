@@ -69,11 +69,24 @@ export class SphincsVariant{
         //split publicKey
         const pk = splitPK(publicKey, this.vt);
         
-        //compute root
-        const digest = this.vt.HASH_MSG(message, pk.pkSeed, pk.pkRoot, extractRandomizer(signature, this.vt));
+        //signature reader
+        let readerOffset = 0;
+        const func_readHash = () => {
+            const chunk = signature.subarray(readerOffset, readerOffset + this.vt.N);
+            readerOffset += chunk.length;
+            return chunk;
+        };
+
+        //get randomizer
+        const R = func_readHash();
+
+        //digest
+        const digest = this.vt.HASH_MSG(message, pk.pkSeed, pk.pkRoot, R);
         const {md, leafIdx, tree} = splitDigest(digest, this.vt);
-        const forsRoot = getSignatureForsRoot(message, signature, pk.pkSeed, pk.pkRoot, md, tree, leafIdx, this.vt, this.adrsSource);
-        const hyperTreeRoot = getHyperTreeRoot(forsRoot, signature, pk.pkSeed, tree, leafIdx, this.vt, this.adrsSource); 
+
+        //compute FORS root
+        const forsRoot = getSignatureForsRoot(func_readHash, pk.pkSeed, md, tree, leafIdx, this.vt, this.adrsSource);
+        const hyperTreeRoot = getHyperTreeRoot(func_readHash, forsRoot, pk.pkSeed, tree, leafIdx, this.vt, this.adrsSource); 
         
         //check roots
         if(hyperTreeRoot.length == pk.pkRoot.length){

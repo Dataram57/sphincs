@@ -1,7 +1,7 @@
 import { ADRS, AdrType } from "./adrs.js";
 import { merkleRoot, merkleTrace } from "./merkle.js";
 import { VariantTools } from "./sphincs.js";
-import { generateWotspPkLeaf, getWotspParams, traceWotspPkLeaf } from "./wotsp.js";
+import { generateWotspPkLeaf, traceWotspPkLeaf } from "./wotsp.js";
 
 export function reconstructRoot(
     skSeed: Uint8Array,
@@ -45,38 +45,24 @@ export function reconstructRoot(
 
 
 export function getHyperTreeRoot(
+    ReadNextHash: () => Uint8Array,
     forsRoot: Uint8Array,
-    signature: Uint8Array,
     pkSeed: Uint8Array,
     tree: bigint,
     leafIdx: number,
     vt: VariantTools,
     adrsSource: ADRS
 ): Uint8Array {
+    //consts
     const H = vt.H;
     const D = vt.D;
-    const A = vt.A;
-    const N = vt.N;
-    const K = vt.K;
-    const { LEN } = getWotspParams(vt);
-
-    
-
     const hPrime = H / D; // height per XMSS layer = 8
-    const layerSigLen = (LEN + hPrime) * N; // WOTS sig + auth path
-    const htOffset = (1 + K * (1 + A)) * N;  // skip R and FORS part
 
+    //for each layer
     let msg = forsRoot;
     let treeIdx = tree;
     let leafIdxCur = leafIdx;
-
     for (let layer = 0; layer < D; layer++) {
-        //calculate layer offset
-        const layerOffset = htOffset + layer * layerSigLen;
-        
-        //WOTS+ signature part
-        const wotsSig = signature.subarray(layerOffset, layerOffset + LEN * N);
-
         //addressing
         const adrs = adrsSource.copy();
         adrs.setLayerAddress(layer);
@@ -85,7 +71,7 @@ export function getHyperTreeRoot(
         adrs.setKeyPairAddress(leafIdxCur);
 
         //Recover the leaf of WOTS+ Public Key from the {signature + message}
-        const leaf = traceWotspPkLeaf(pkSeed, wotsSig, msg, adrs, vt);
+        const leaf = traceWotspPkLeaf(ReadNextHash, pkSeed, msg, adrs, vt);
 
         //Use Leaf of the WOTS+ Public Key to climb to the root with the authentication path
         const treeADRS = adrs.copy();
@@ -104,9 +90,8 @@ export function getHyperTreeRoot(
                 return vt.HASH_T(pkSeed, treeADRS, [left, right]);
             },
             //Next Sibling
-            (queryIndex) => {
-                const i = layerOffset + (LEN + queryIndex) * N;
-                return signature.subarray(i, i + N);
+            (queryIndex : number) => {
+                return ReadNextHash();
             },
             //Merkle Trace params
             leaf,

@@ -4,10 +4,8 @@ import { VariantTools } from "./sphincs.js";
 import { base2b } from "./utils.js";
 
 export function getSignatureForsRoot(
-    message: Uint8Array,
-    signature: Uint8Array,
+    ReadNextHash: () => Uint8Array,
     pkSeed: Uint8Array,
-    pkRoot: Uint8Array,
     //other
     md: Uint8Array,
     tree: bigint,
@@ -17,12 +15,10 @@ export function getSignatureForsRoot(
     vt : VariantTools,
     adrsSource : ADRS
 ) {
+    //consts
     const A = vt.A;
     const K = vt.K;
-    const N = vt.N;
 
-    // get start information
-    //const { md, tree, leafIdx } = hashMessage(message, pkSeed, pkRoot, extractRandomizer(signature));
     // get indexes for each tree
     const indices = base2b(md, A, K);
 
@@ -46,7 +42,7 @@ export function getSignatureForsRoot(
 
         // get leaf sk (skip randomizer block, skip previous trees' sk+authpath blocks)
         let chunkIdx = 1 + i * (1 + A);
-        const sk = signature.subarray(chunkIdx * N, chunkIdx * N + N);
+        const sk = ReadNextHash();
 
         //save new root
         forsRoots.push(
@@ -69,7 +65,7 @@ export function getSignatureForsRoot(
                 //sibling root
                 (queryIndex: number) => {
                     chunkIdx++;
-                    return signature.subarray(chunkIdx * N, chunkIdx * N + N);
+                    return ReadNextHash();
                 },
                 //start: compute 1 argument root from the secret
                 vt.HASH_F(pkSeed, forsAdrs, sk),
