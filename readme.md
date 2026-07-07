@@ -15,9 +15,13 @@ SPHINCS+ is a stateless, hash-based digital signature scheme designed to remain 
 
 ## Installation
 
+Install via npm:
+
 ```bash
 npm install @dataram57/sphincs
 ```
+
+Alternatively, download the contents of [`/src`](/src) and use [`/src/index.ts`](/src/index.ts) directly.
 
 ## Usage
 
@@ -58,7 +62,14 @@ const valid = sphincs.verify(message, publicKey, signature);
 console.log("Signature valid:", valid);
 ```
 
+## Presentation
+
+* My own presentation about how SPHINCS+ works.
+  https://docs.google.com/presentation/d/1Ik8m7rv7W9fCXgJgCMuEECm5ped8yL8CCTa6Q3vPadQ/edit?usp=sharing
+
 ## Resources
+
+### Main
 
 * NIST FIPS 205 – Stateless Hash-Based Digital Signature Standard
   https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.205.pdf
@@ -68,6 +79,8 @@ console.log("Signature valid:", valid);
 
 * SPHINCS+ Reference Implementation
   https://github.com/sphincs/sphincsplus
+
+### Very helpful
 
 * noble-post-quantum
   https://github.com/paulmillr/noble-post-quantum
