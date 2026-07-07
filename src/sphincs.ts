@@ -147,8 +147,8 @@ export class SphincsVariant{
 
         //randomizer (uses skPrf)
         //TODO: Repair this hash
-        //const r : Uint8Array = randomUint8Array(N);
-        const r = new Uint8Array(N);
+        const r : Uint8Array = randomUint8Array(N);
+        //const r = new Uint8Array(N);
         const R = this.vt.HASH_PRF_MSG(sk.skPrf, r, message);
         func_write(R);
 
