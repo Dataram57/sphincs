@@ -1,6 +1,5 @@
 import { ADRS } from "../adrs.js";
 import { VariantTools } from "../sphincs.js";
-import { adjustMessage, uint8ArrayToBigInt } from "../utils.js";
 import { mgf1Sha512, sha256, sha512 } from "./common.js";
 
 export class Sha2_VariantTools_3_5 implements VariantTools {
@@ -17,14 +16,14 @@ export class Sha2_VariantTools_3_5 implements VariantTools {
 
     constructor(
         //params
-        N : number = 32,
-        H : number = 64,
-        D : number = 8,
-        W : number = 16,
-        K : number = 22,
-        A : number = 14,
+        N : number,
+        H : number,
+        D : number,
+        W : number,
+        K : number,
+        A : number,
         //MGF params
-        M : number = 0
+        M : number = Math.ceil((K * A) / 8) + Math.ceil((H - H / D) / 8) + Math.ceil(H / D / 8)
     ){
         //params
         this.N = N;
@@ -37,9 +36,10 @@ export class Sha2_VariantTools_3_5 implements VariantTools {
         this.M = M;
     }
 
-    //section 11.2.2
+    //FIPS 205 - Section 11.2.2
 
     //TODO: USE HMAC
+    //PRF_MSG
     HASH_PRF_MSG(skPrf: Uint8Array, opt_rand : Uint8Array, message : Uint8Array) : Uint8Array{
         return sha512(skPrf, opt_rand, message).subarray(0, this.N);
     }
@@ -64,63 +64,14 @@ export class Sha2_VariantTools_3_5 implements VariantTools {
         return sha512(pkSeed, new Uint8Array(128 - this.N), adrs.bytes(), left, right).subarray(0, this.N);
     }
 
-    HASH_MSG(message: Uint8Array, pkSeed: Uint8Array, pkRoot: Uint8Array, R: Uint8Array){
-        const H = this.H;
-        const D = this.D;
-        const K = this.K;
-        const A = this.A;
-        const m = this.M;
-
-        //adjust message
-        message = adjustMessage(message);
-
-        //consts
-        const hPrime = H / D; // height of a single XMSS tree
-        //calculations done bytes (not perfect bits)
-        const mdBytes = Math.ceil((K * A) / 8); //Addresses all FORS signing sub trees
-        const idxTreeBytes = Math.ceil((H - hPrime) / 8);  // 7 bytes   //all XMSS trees
-        const idxLeafBytes = Math.ceil(hPrime / 8);        // 1 byte    //bottom Merkle tree
-        //magic m
-        //const m = mdBytes + idxTreeBytes + idxLeafBytes;   // 47 bytes total
-
-        //================================================================
-        // Inner hash: SHA-512(R || PK.seed || PK.root || M)
-        const inner = sha512(R, pkSeed, pkRoot, message);
-
-        //SHA2 variations
-        //Ref: Page 46
-
-        // MGF1 seed: R || PK.seed || inner
+    //H_MSG
+    HASH_MSG(messageAdjusted: Uint8Array, pkSeed: Uint8Array, pkRoot: Uint8Array, R: Uint8Array){
+        const inner = sha512(R, pkSeed, pkRoot, messageAdjusted);
         const mgfSeed = new Uint8Array(R.length + pkSeed.length + inner.length);
         mgfSeed.set(R, 0);
         mgfSeed.set(pkSeed, R.length);
         mgfSeed.set(inner, R.length + pkSeed.length);
-
-        const digest = mgf1Sha512(mgfSeed, m);
-        //================================================================
-
-        //read stuff from digest
-        const md = digest.subarray(0, mdBytes);
-        const idxTreeRaw = digest.subarray(mdBytes, mdBytes + idxTreeBytes);
-        const idxLeafRaw = digest.subarray(mdBytes + idxTreeBytes, m);
-
-
-        // toInt(idx_tree) mod 2^(h - h')
-        let idxTree = 0n;
-        for (const b of idxTreeRaw) idxTree = (idxTree << 8n) | BigInt(b);
-        idxTree &= (1n << BigInt(H - hPrime)) - 1n;
-
-        // toInt(idx_leaf) mod 2^h'
-        let idxLeaf = 0;
-        for (const b of idxLeafRaw) idxLeaf = (idxLeaf << 8) | b;
-        idxLeaf &= (1 << hPrime) - 1;
-
-        return { 
-            md: md,     //message digest
-            //get ids + limit to bits
-            tree: uint8ArrayToBigInt(idxTreeRaw) & ((1n << BigInt(H - hPrime)) - 1n),   //bottom tree index
-            leafIdx: Number(uint8ArrayToBigInt(idxLeafRaw) & ((1n << BigInt(hPrime)) - 1n)) //leaf index of the bottom tree
-        };
+        return mgf1Sha512(mgfSeed, this.M);
     }
     
 }

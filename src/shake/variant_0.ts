@@ -1,6 +1,5 @@
 import { ADRS } from "../adrs.js";
 import { VariantTools } from "../sphincs.js";
-import { adjustMessage, uint8ArrayToBigInt } from "../utils.js";
 import { shake256 } from "./common.js";
 
 
@@ -18,14 +17,14 @@ export class Shake_VariantTools implements VariantTools {
 
     constructor(
         //params
-        N : number = 32,
-        H : number = 0,
-        D : number = 0,
-        W : number = 0,
-        K : number = 0,
-        A : number = 0,
+        N : number,
+        H : number,
+        D : number,
+        W : number,
+        K : number,
+        A : number,
         //MGF params
-        M : number = 0
+        M : number = Math.ceil((K * A) / 8) + Math.ceil((H - H / D) / 8) + Math.ceil(H / D / 8)
     ){
         //params
         this.N = N;
@@ -34,6 +33,7 @@ export class Shake_VariantTools implements VariantTools {
         this.W = W;
         this.K = K;
         this.A = A;
+        //MGF params
         this.M = M;
     }
 
@@ -64,43 +64,8 @@ export class Shake_VariantTools implements VariantTools {
         return shake256(this.N, pkSeed, adrs.bytes(), left, right).subarray(0, this.N);
     }
 
-    HASH_MSG(message: Uint8Array, pkSeed: Uint8Array, pkRoot: Uint8Array, R: Uint8Array) {
-        const H = this.H;
-        const K = this.K;
-        const A = this.A;
-        const M = this.M;
-        const hPrime = this.H / this.D;
-        
-        //adjust message
-        message = adjustMessage(message);
-
-        //digest
-        const digest = shake256(M, R, pkSeed, pkRoot, message);
-
-        // sizes in bytes, per spec (rounded up from bit lengths)
-        const mdLen = Math.ceil((K * A) / 8);
-        const treeLen = Math.ceil((H - hPrime) / 8);
-        const leafLen = Math.ceil(hPrime / 8);
-
-        if (mdLen + treeLen + leafLen !== M) {
-            throw new Error(
-                `HASH_MSG length mismatch: mdLen(${mdLen}) + treeLen(${treeLen}) + leafLen(${leafLen}) != M(${M})`
-            );
-        }
-
-        const md = digest.slice(0, mdLen);
-        const idxTreeRaw = digest.slice(mdLen, mdLen + treeLen);
-        const idxLeafRaw = digest.slice(mdLen + treeLen, mdLen + treeLen + leafLen);
-
-        const tree =
-            uint8ArrayToBigInt(idxTreeRaw) &
-            ((1n << BigInt(H - hPrime)) - 1n);
-
-        const leafIdx = Number(
-            uint8ArrayToBigInt(idxLeafRaw) & ((1n << BigInt(hPrime)) - 1n)
-        );
-
-        return { md, tree, leafIdx };
+    HASH_MSG(messageAdjusted: Uint8Array, pkSeed: Uint8Array, pkRoot: Uint8Array, R: Uint8Array) {
+        return shake256(this.M, R, pkSeed, pkRoot, messageAdjusted);
     }
     
 }

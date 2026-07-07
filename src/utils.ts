@@ -50,6 +50,39 @@ export function adjustMessage(msg: Uint8Array, ctx: Uint8Array = EMPTY): Uint8Ar
     return out;
 }
 
+
+//FIPS 205 - Section 9.2
+export function splitDigest(digest : Uint8Array, vt : VariantTools){
+    //consts
+    const K = vt.K;
+    const A = vt.A;
+    const H = vt.H;
+    const hPrime = H / vt.D;
+    const M = vt.M;
+
+    //lengths
+    const mdLen = Math.ceil((K * A) / 8);
+    const treeLen = Math.ceil((H - hPrime) / 8);
+    const leafLen = Math.ceil(hPrime / 8);
+
+    //sumcheck
+    if(mdLen + treeLen + leafLen !== M)
+        throw new Error(`splitDigest length mismatch: mdLen(${mdLen}) + treeLen(${treeLen}) + leafLen(${leafLen}) != M(${M})`);
+
+    //slice digest
+    const md = digest.slice(0, mdLen);
+    const idxTreeRaw = digest.slice(mdLen, mdLen + treeLen);
+    const idxLeafRaw = digest.slice(mdLen + treeLen, mdLen + treeLen + leafLen);
+
+    //rest
+    const tree = uint8ArrayToBigInt(idxTreeRaw) & ((1n << BigInt(H - hPrime)) - 1n);
+    const leafIdx = Number(uint8ArrayToBigInt(idxLeafRaw) & ((1n << BigInt(hPrime)) - 1n));
+
+    //return
+    return { md, tree, leafIdx };
+}
+
+
 export function extractRandomizer(
     signature : Uint8Array,
     vt : VariantTools

@@ -2,7 +2,7 @@ import { ADRS, AdrType } from "./adrs.js";
 import { getSignatureForsRoot, signFors } from "./fors.js";
 import { getHyperTreeRoot, reconstructRoot } from "./hypertree.js";
 import { merkleProof } from "./merkle.js";
-import { extractRandomizer, randomUint8Array, splitPK, splitSK } from "./utils.js";
+import { adjustMessage, extractRandomizer, randomUint8Array, splitDigest, splitPK, splitSK } from "./utils.js";
 import { generateWotspPkLeaf, getWotspParams, signWotsp } from "./wotsp.js";
 
 export interface VariantTools{
@@ -23,11 +23,7 @@ export interface VariantTools{
     HASH_F : (pkSeed : Uint8Array, adrs : ADRS, input : Uint8Array) => Uint8Array;
     HASH_T : (pkSeed : Uint8Array, adrs: ADRS, chunks: Uint8Array[]) => Uint8Array;
     HASH_H : (pkSeed : Uint8Array, adrs: ADRS, left: Uint8Array, right: Uint8Array) => Uint8Array;
-    HASH_MSG : (message: Uint8Array, pkSeed: Uint8Array, pkRoot: Uint8Array, R: Uint8Array) => {
-        md: Uint8Array<ArrayBufferLike>;
-        tree: bigint;
-        leafIdx: number;
-    };
+    HASH_MSG : (message: Uint8Array, pkSeed: Uint8Array, pkRoot: Uint8Array, R: Uint8Array) => Uint8Array;
 }
 
 export class SphincsVariant{
@@ -67,11 +63,15 @@ export class SphincsVariant{
     }
 
     verify(message : Uint8Array, publicKey : Uint8Array, signature : Uint8Array){
+        //adjust message
+        message = adjustMessage(message);
+        
         //split publicKey
         const pk = splitPK(publicKey, this.vt);
         
         //compute root
-        const {md, leafIdx, tree} = this.vt.HASH_MSG(message, pk.pkSeed, pk.pkRoot, extractRandomizer(signature, this.vt));
+        const digest = this.vt.HASH_MSG(message, pk.pkSeed, pk.pkRoot, extractRandomizer(signature, this.vt));
+        const {md, leafIdx, tree} = splitDigest(digest, this.vt);
         const forsRoot = getSignatureForsRoot(message, signature, pk.pkSeed, pk.pkRoot, md, tree, leafIdx, this.vt, this.adrsSource);
         const hyperTreeRoot = getHyperTreeRoot(forsRoot, signature, pk.pkSeed, tree, leafIdx, this.vt, this.adrsSource); 
         
@@ -93,6 +93,9 @@ export class SphincsVariant{
         const D = this.vt.D;
         const H = this.vt.H;
         const { LEN } = getWotspParams(this.vt);
+
+        //adjust message
+        message = adjustMessage(message);
 
         //split secretKey
         const sk = splitSK(secretKey, this.vt);
@@ -118,7 +121,8 @@ export class SphincsVariant{
         const hPrime = H / D;
 
         //digest
-        const { md, tree, leafIdx } = this.vt.HASH_MSG(message, sk.pkSeed, sk.pkRoot, R);
+        const digest = this.vt.HASH_MSG(message, sk.pkSeed, sk.pkRoot, R);
+        const {md, leafIdx, tree} = splitDigest(digest, this.vt);
 
         //fors
         const forsRoot = signFors(func_write, md, tree, leafIdx, sk.skSeed, sk.pkSeed, this.vt, this.adrsSource);
@@ -186,7 +190,7 @@ export class SphincsVariant{
         let i = msg.length;
         while(i--)
             if(msg[i] != sk.pkRoot[i])
-                throw "DIFFERENT_ROOTS";
+                throw new Error(`Signature expected trace to {${sk.pkRoot}}, but got {${msg}}`);
 
         //return final signature
         return signature;
