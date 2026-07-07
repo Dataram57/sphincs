@@ -19,27 +19,7 @@ SPHINCS+ is a stateless, hash-based digital signature scheme designed to remain 
 npm install @dataram57/sphincs
 ```
 
-## Supported Variants
-
-### SHA-2
-
-* `slh_dsa_sha2_128s`
-* `slh_dsa_sha2_128f`
-* `slh_dsa_sha2_192s`
-* `slh_dsa_sha2_192f`
-* `slh_dsa_sha2_256s`
-* `slh_dsa_sha2_256f`
-
-### SHAKE
-
-* `slh_dsa_shake_128s`
-* `slh_dsa_shake_128f`
-* `slh_dsa_shake_192s`
-* `slh_dsa_shake_192f`
-* `slh_dsa_shake_256s`
-* `slh_dsa_shake_256f`
-
-## Example
+## Usage
 
 ```typescript
 import {
