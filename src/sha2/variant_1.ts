@@ -2,40 +2,7 @@ import { ADRS } from "../adrs.js";
 import { VariantTools } from "../sphincs.js";
 import { mgf1Sha512, sha256, sha512 } from "./common.js";
 
-export class Sha2_VariantTools_3_5 implements VariantTools {
-    //SPHINCS params
-    public N : number; //hash length
-    public H : number; //Whole Hyper Tree addressing
-    public D : number; //How many Merkle trees/layers are in the hyper tree
-    public W : number; //Winternitz
-    public K : number; //How many FORS trees
-    public A : number; //How many levels 1 FORS tree has.
-
-    //MGF params
-    M : number;
-
-    constructor(
-        //params
-        N : number,
-        H : number,
-        D : number,
-        W : number,
-        K : number,
-        A : number,
-        //MGF params
-        M : number = Math.ceil((K * A) / 8) + Math.ceil((H - H / D) / 8) + Math.ceil(H / D / 8)
-    ){
-        //params
-        this.N = N;
-        this.H = H;
-        this.D = D;
-        this.W = W;
-        this.K = K;
-        this.A = A;
-        //MGF params
-        this.M = M;
-    }
-
+export class Sha2_VariantTools_3_5 extends VariantTools {
     //FIPS 205 - Section 11.2.2
 
     //TODO: USE HMAC

@@ -1,3 +1,4 @@
+import { EMPTY } from "./utils.js"
 
 
 
@@ -13,22 +14,22 @@ export enum AdrType {
 
 
 
-export interface ADRS {
-    setLayerAddress(layer: number): void;
-    setTreeAddress(tree: bigint): void;
-    setTypeAndClear(type: AdrType): void;
+export class ADRS {
+    setLayerAddress(layer: number): void{};
+    setTreeAddress(tree: bigint): void{};
+    setTypeAndClear(type: AdrType): void{};
 
-    setKeyPairAddress(idx: number): void;
-    getKeyPairAddress(): number;
+    setKeyPairAddress(idx: number): void{};
+    getKeyPairAddress(): number{return 0};
 
-    setChainAddress(idx: number): void;
-    setHashAddress(idx: number): void;
+    setChainAddress(idx: number): void{};
+    setHashAddress(idx: number): void{};
 
-    setTreeHeight(height: number): void;
-    setTreeIndex(index: number): void;
-    getTreeIndex(): number;
+    setTreeHeight(height: number): void{};
+    setTreeIndex(index: number): void{};
+    getTreeIndex(): number{return 0};
 
-    bytes(): Uint8Array;
+    bytes(): Uint8Array{return EMPTY};
 
-    copy(): ADRS;
+    copy(): ADRS{return this};
 }

@@ -2,10 +2,10 @@ import { ADRS, AdrType } from "./adrs.js";
 import { getSignatureForsRoot, signFors } from "./fors.js";
 import { getHyperTreeRoot, reconstructRoot } from "./hypertree.js";
 import { merkleProof } from "./merkle.js";
-import { adjustMessage, extractRandomizer, randomUint8Array, splitDigest, splitPK, splitSK } from "./utils.js";
+import { adjustMessage, EMPTY, randomUint8Array, splitDigest, splitPK, splitSK } from "./utils.js";
 import { generateWotspPkLeaf, getWotspParams, signWotsp } from "./wotsp.js";
 
-export interface VariantTools{
+export class VariantTools{
     //SPHINCS params
     N : number; //hash length
     H : number; //Whole Hyper Tree addressing
@@ -17,13 +17,35 @@ export interface VariantTools{
     //MGF params
     M : number;
 
+    constructor(
+        //params
+        N : number,
+        H : number,
+        D : number,
+        W : number,
+        K : number,
+        A : number,
+        //MGF params
+        M : number = Math.ceil((K * A) / 8) + Math.ceil((H - H / D) / 8) + Math.ceil(H / D / 8)
+    ){
+        //params
+        this.N = N;
+        this.H = H;
+        this.D = D;
+        this.W = W;
+        this.K = K;
+        this.A = A;
+        //MGF params
+        this.M = M;
+    }
+
     //SPHINCS hashing functions
-    HASH_PRF_MSG : (skPrf: Uint8Array, opt_rand : Uint8Array, message : Uint8Array) => Uint8Array;
-    HASH_PRF : (skSeed: Uint8Array, pkSeed : Uint8Array, adrs : ADRS) => Uint8Array;
-    HASH_F : (pkSeed : Uint8Array, adrs : ADRS, input : Uint8Array) => Uint8Array;
-    HASH_T : (pkSeed : Uint8Array, adrs: ADRS, chunks: Uint8Array[]) => Uint8Array;
-    HASH_H : (pkSeed : Uint8Array, adrs: ADRS, left: Uint8Array, right: Uint8Array) => Uint8Array;
-    HASH_MSG : (message: Uint8Array, pkSeed: Uint8Array, pkRoot: Uint8Array, R: Uint8Array) => Uint8Array;
+    HASH_PRF_MSG(skPrf: Uint8Array, opt_rand : Uint8Array, message : Uint8Array) : Uint8Array { return EMPTY; };
+    HASH_PRF(skSeed: Uint8Array, pkSeed : Uint8Array, adrs : ADRS) : Uint8Array { return EMPTY; };
+    HASH_F(pkSeed : Uint8Array, adrs : ADRS, input : Uint8Array) : Uint8Array { return EMPTY; };
+    HASH_T(pkSeed : Uint8Array, adrs: ADRS, chunks: Uint8Array[]) : Uint8Array { return EMPTY; };
+    HASH_H(pkSeed : Uint8Array, adrs: ADRS, left: Uint8Array, right: Uint8Array) : Uint8Array { return EMPTY; };
+    HASH_MSG(message: Uint8Array, pkSeed: Uint8Array, pkRoot: Uint8Array, R: Uint8Array) : Uint8Array { return EMPTY; };
 }
 
 export class SphincsVariant{

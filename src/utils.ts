@@ -24,6 +24,18 @@ export function splitPK(
     };
 }
 
+export function concatBytes(arr: Uint8Array[]): Uint8Array {
+    let l = 0;
+    for (const bytes of arr) l += bytes.length;
+    const x = new Uint8Array(l);
+    let offset = 0;
+    for (const bytes of arr) {
+        x.set(bytes, offset);
+        offset += bytes.length;
+    }
+    return x;
+}
+
 export function uint8ArrayToBigInt(arr : Uint8Array) : bigint{
     let v = 0n;
     for (const b of arr)
@@ -37,9 +49,10 @@ export function randomUint8Array(length: number): Uint8Array {
     return arr;
 }
 
-const EMPTY = new Uint8Array(0);
+
 
 //Adds 2 additional bytes at start to the message
+export const EMPTY = new Uint8Array(0);
 export function adjustMessage(msg: Uint8Array, ctx: Uint8Array = EMPTY): Uint8Array {
     if (ctx.length > 255) throw new RangeError('context should be 255 bytes or less');
     const out = new Uint8Array(2 + ctx.length + msg.length);
@@ -49,7 +62,6 @@ export function adjustMessage(msg: Uint8Array, ctx: Uint8Array = EMPTY): Uint8Ar
     out.set(msg, 2 + ctx.length);
     return out;
 }
-
 
 //FIPS 205 - Section 9.2
 export function splitDigest(digest : Uint8Array, vt : VariantTools){
@@ -82,28 +94,7 @@ export function splitDigest(digest : Uint8Array, vt : VariantTools){
     return { md, tree, leafIdx };
 }
 
-
-export function extractRandomizer(
-    signature : Uint8Array,
-    vt : VariantTools
-){
-    const N = vt.N;
-    return signature.subarray(0, N);
-}
-
-export function concatBytes(arr: Uint8Array[]): Uint8Array {
-    let l = 0;
-    for (const bytes of arr) l += bytes.length;
-    const x = new Uint8Array(l);
-    let offset = 0;
-    for (const bytes of arr) {
-        x.set(bytes, offset);
-        offset += bytes.length;
-    }
-    return x;
-}
-
-// FIPS 205 Algorithm 4 base_2^b: split md into K indices of A bits each.
+//FIPS 205 - Section 4.4 - Algorithm 4
 //used in FORS to get indexes of leafs for K trees
 export function base2b(input: Uint8Array, b: number, outLen: number): number[] {
     const mask = (1 << b) - 1;

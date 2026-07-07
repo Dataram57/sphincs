@@ -1,6 +1,6 @@
 import { ADRS, AdrType } from "../adrs.js";
 
-export class AdrsCompressed implements ADRS {
+export class AdrsCompressed extends ADRS {
     buf = new Uint8Array(22);
     private view = new DataView(this.buf.buffer);
 
