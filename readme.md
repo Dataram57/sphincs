@@ -1,3 +1,5 @@
+# WARNING: Project not released yet. Check [`todo.md`](./todo.md) for more details.
+
 # SPHINCS+
 
 A modern TypeScript implementation of the **SLH-DSA (SPHINCS+)** post-quantum digital signature algorithm defined in **NIST FIPS 205**.
