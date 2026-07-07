@@ -1,6 +1,7 @@
 import { ADRS } from "../adrs.js";
 import { VariantTools } from "../sphincs.js";
-import { adjustMessage, mgf1Sha512, sha256, sha512, uint8ArrayToBigInt } from "./common.js";
+import { adjustMessage, uint8ArrayToBigInt } from "../utils.js";
+import { mgf1Sha512, sha256, sha512 } from "./common.js";
 
 export class Sha2_VariantTools_3_5 implements VariantTools {
     //SPHINCS params

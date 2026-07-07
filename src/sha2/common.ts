@@ -20,26 +20,6 @@ export function sha512(...chunks: Uint8Array[]): Uint8Array {
     return new Uint8Array(h.digest());
 }
 
-const EMPTY = new Uint8Array(0);
-
-export function uint8ArrayToBigInt(arr : Uint8Array) : bigint{
-    let v = 0n;
-    for (const b of arr)
-        v = (v << 8n) | BigInt(b);
-    return v;
-}
-
-//Adds 2 additional bytes at start to the message
-export function adjustMessage(msg: Uint8Array, ctx: Uint8Array = EMPTY): Uint8Array {
-    if (ctx.length > 255) throw new RangeError('context should be 255 bytes or less');
-    const out = new Uint8Array(2 + ctx.length + msg.length);
-    out[0] = 0;
-    out[1] = ctx.length;
-    out.set(ctx, 2);
-    out.set(msg, 2 + ctx.length);
-    return out;
-}
-
 
 // I2OSP: encode a non-negative integer as a big-endian byte string of given length
 export function i2osp(value: number, length: number): Uint8Array {

@@ -24,10 +24,30 @@ export function splitPK(
     };
 }
 
+export function uint8ArrayToBigInt(arr : Uint8Array) : bigint{
+    let v = 0n;
+    for (const b of arr)
+        v = (v << 8n) | BigInt(b);
+    return v;
+}
+
 export function randomUint8Array(length: number): Uint8Array {
     const arr = new Uint8Array(length);
     crypto.getRandomValues(arr);
     return arr;
+}
+
+const EMPTY = new Uint8Array(0);
+
+//Adds 2 additional bytes at start to the message
+export function adjustMessage(msg: Uint8Array, ctx: Uint8Array = EMPTY): Uint8Array {
+    if (ctx.length > 255) throw new RangeError('context should be 255 bytes or less');
+    const out = new Uint8Array(2 + ctx.length + msg.length);
+    out[0] = 0;
+    out[1] = ctx.length;
+    out.set(ctx, 2);
+    out.set(msg, 2 + ctx.length);
+    return out;
 }
 
 export function extractRandomizer(
