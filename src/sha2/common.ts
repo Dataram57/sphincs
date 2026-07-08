@@ -1,22 +1,30 @@
-import { createHash } from "node:crypto";
+import { createHash, createHmac } from "node:crypto";
 
 export function sha256(...chunks: Uint8Array[]): Uint8Array {
     const h = createHash("sha256");
-
-    for (const c of chunks) {
+    for(const c of chunks)
         h.update(c);
-    }
-
     return new Uint8Array(h.digest());
 }
 
 export function sha512(...chunks: Uint8Array[]): Uint8Array {
     const h = createHash("sha512");
-
-    for (const c of chunks) {
+    for(const c of chunks)
         h.update(c);
-    }
+    return new Uint8Array(h.digest());
+}
 
+export function hmacSha256(iv : Uint8Array, ...chunks: Uint8Array[]): Uint8Array{
+    const h = createHmac("sha256", iv);
+    for(const c of chunks)
+        h.update(c);
+    return new Uint8Array(h.digest());
+}
+
+export function hmacSha512(iv : Uint8Array, ...chunks: Uint8Array[]): Uint8Array{
+    const h = createHmac("sha512", iv);
+    for(const c of chunks)
+        h.update(c);
     return new Uint8Array(h.digest());
 }
 
