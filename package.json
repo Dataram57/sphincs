@@ -1,7 +1,7 @@
 {
     "name": "@dataram57/sphincs",
-    "version": "0.0.3",
-    "description": "bla bla bla",
+    "version": "1.0.0",
+    "description": "SPHINCS+ TypeScript vanilla implementation ",
     "type": "module",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",

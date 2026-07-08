@@ -1,5 +1,3 @@
-# WARNING: Project not released yet. Check [`todo.md`](./todo.md) for more details.
-
 # SPHINCS+
 
 A modern TypeScript implementation of the **SLH-DSA (SPHINCS+)** post-quantum digital signature algorithm defined in **NIST FIPS 205**.
@@ -13,7 +11,7 @@ SPHINCS+ is a stateless, hash-based digital signature scheme designed to remain 
 * ✅ Supports all SHA-2 parameter sets
 * ✅ Supports all SHAKE parameter sets
 * ✅ Simple API for key generation, signing, and verification
-* ✅ Works in Node.js and modern TypeScript environments
+* ✅ Works in **Node.js** and modern TypeScript environments
 
 ## Installation
 
