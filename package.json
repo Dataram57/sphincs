@@ -13,7 +13,8 @@
     ],
     "scripts": {
         "build": "tsc",
-        "prepublishOnly": "npm run build"
+        "prepublishOnly": "npm run build",
+        "test_noble": "tsx ./test/noble.ts"
     },
     "repository": {
         "type": "git",
@@ -22,6 +23,7 @@
     "author": "dataram57",
     "license": "ISC",
     "devDependencies": {
+        "@noble/post-quantum": "^0.6.1",
         "@types/node": "^26.1.0",
         "tsx": "^4.23.0",
         "typescript": "^6.0.3"
