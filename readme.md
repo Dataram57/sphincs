@@ -82,6 +82,9 @@ console.log("Signature valid:", valid);
 
 ### Very helpful
 
+* Hash-Based Signatures
+  www.youtube.com/watch?list=PLA1qgQLL41STcDn6GCAE36RzId-Xq4JU8
+
 * noble-post-quantum
   https://github.com/paulmillr/noble-post-quantum
 
