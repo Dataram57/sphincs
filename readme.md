@@ -1,4 +1,4 @@
-# SPHINCS+
+# Stateless Hash-Based Digital Signature Standard *... SPHINCS+*
 
 A modern TypeScript implementation of the **SLH-DSA (SPHINCS+)** post-quantum digital signature algorithm defined in **NIST FIPS 205**.
 
@@ -77,13 +77,13 @@ console.log("Signature valid:", valid);
 * SPHINCS+ Official Website
   https://sphincs.org/
 
-* SPHINCS+ Reference Implementation
+* SPHINCS+ Reference Implementation ***(Not FIPS 205 compatible)***
   https://github.com/sphincs/sphincsplus
 
 ### Very helpful
 
 * Hash-Based Signatures
-  www.youtube.com/watch?list=PLA1qgQLL41STcDn6GCAE36RzId-Xq4JU8
+  https://www.youtube.com/watch?list=PLA1qgQLL41STcDn6GCAE36RzId-Xq4JU8
 
 * noble-post-quantum
   https://github.com/paulmillr/noble-post-quantum
