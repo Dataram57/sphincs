@@ -32,7 +32,7 @@ import {
     slh_dsa_shake_192f as dr57_shake_192f,
     slh_dsa_shake_256s as dr57_shake_256s,
     slh_dsa_shake_256f as dr57_shake_256f,
-} from "@dataram57/sphincs";
+} from "../../src/index.js";
 
 
 function stringToUint8Array(str: string): Uint8Array {
