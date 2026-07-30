@@ -80,6 +80,7 @@ for params in "${PARAMS[@]}"; do
 
     mkdir -p "$BUILD_DIR/$params"
 
+    echo "Building $params - keygen:"
     gcc -O3 -std=c99 \
         -DPARAMS="$params" \
         -DTHASH="simple" \
@@ -89,6 +90,29 @@ for params in "${PARAMS[@]}"; do
         "ref/thash_${FAMILY}_simple.c" \
         ../keygen.c \
         -o "$BUILD_DIR/$params/keygen"
+
+    echo "Building $params - sign:"
+    gcc -O3 -std=c99 \
+        -DPARAMS="$params" \
+        -DTHASH="simple" \
+        -Iref \
+        "${COMMON_SOURCES[@]}" \
+        "${EXTRA[@]}" \
+        "ref/thash_${FAMILY}_simple.c" \
+        ../sign.c \
+        -o "$BUILD_DIR/$params/sign"
+
+    echo "Building $params - verify:"
+    gcc -O3 -std=c99 \
+        -DPARAMS="$params" \
+        -DTHASH="simple" \
+        -Iref \
+        "${COMMON_SOURCES[@]}" \
+        "${EXTRA[@]}" \
+        "ref/thash_${FAMILY}_simple.c" \
+        ../verify.c \
+        -o "$BUILD_DIR/$params/verify"
+
 done
 
 echo
