@@ -92,7 +92,7 @@ npm run test_compatibility/sphincsplus
 * SPHINCS+ Official Website
   https://sphincs.org/
 
-* SPHINCS+ Reference Implementation ***(Not FIPS 205 compatible)***
+* SPHINCS+ Reference Implementation
   https://github.com/sphincs/sphincsplus
 
 ### Very helpful
