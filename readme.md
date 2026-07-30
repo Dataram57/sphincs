@@ -61,6 +61,21 @@ const valid = sphincs.verify(message, publicKey, signature);
 
 console.log("Signature valid:", valid);
 ```
+## Testing compatibility
+
+### `@noble/post-quantum` from [`npm`](https://www.npmjs.com/package/@noble/post-quantum)
+
+```sh
+npm run test_compatibility/@noble/post-quantum
+```
+
+### `sphincsplus` from [`sphincs@github`](https://github.com/sphincs/sphincsplus)
+
+Follow instruction from associated [README.MD](./test/sphincsplus/README.MD) first, and run:
+
+```sh
+npm run test_compatibility/sphincsplus
+```
 
 ## Presentation
 

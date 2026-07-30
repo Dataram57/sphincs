@@ -14,7 +14,8 @@
     "scripts": {
         "build": "tsc",
         "prepublishOnly": "npm run build",
-        "test_noble": "tsx ./test/noble/index.ts"
+        "test_compatibility/@noble/post-quantum": "tsx ./test/noble/index.ts",
+        "test_compatibility/sphincsplus": "tsx ./test/sphincsplus/index.ts"
     },
     "repository": {
         "type": "git",

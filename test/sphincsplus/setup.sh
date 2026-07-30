@@ -7,9 +7,8 @@ REPO_DIR="sphincsplus"
 BUILD_DIR="../build"
 
 # Pin to a known revision
-COMMIT="ef36d20ff3588324ad69f844507b8217f008f35a"
-# Or use:
-# BRANCH="bas/fips205"
+COMMIT=$(cat repo_commit)
+BRANCH=$(cat repo_branch)
 
 for tool in git gcc; do
     command -v "$tool" >/dev/null || {
