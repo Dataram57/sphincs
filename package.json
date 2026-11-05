@@ -15,7 +15,8 @@
         "build": "tsc",
         "prepublishOnly": "npm run build",
         "test_compatibility/@noble/post-quantum": "tsx ./test/noble/index.ts",
-        "test_compatibility/sphincsplus": "tsx ./test/sphincsplus/index.ts"
+        "test_compatibility/sphincsplus": "tsx ./test/sphincsplus/index.ts",
+        "benchmark": "tsx ./benchmark/index.ts"
     },
     "repository": {
         "type": "git",
@@ -25,7 +26,7 @@
     "license": "ISC",
     "devDependencies": {
         "@noble/post-quantum": "^0.6.1",
-        "@types/node": "^26.1.0",
+        "@types/node": "^26.6.6",
         "tsx": "^4.23.0",
         "typescript": "^6.0.3"
     }

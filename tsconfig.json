@@ -3,11 +3,11 @@
         "target": "ES2022",
         "module": "NodeNext",
         "moduleResolution": "NodeNext",
-        "rootDir": "src",
+        "rootDir": ".",
         "outDir": "dist",
         "declaration": true,
         "strict": true,
         "types": ["node"]
     },
-    "include": ["src"]
+    "include": ["src", "benchmark/**/*.ts", "test/**/*.ts"]
 }
