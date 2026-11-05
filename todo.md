@@ -1,3 +1,9 @@
+# Prepare benchmarks
+
+Running `tsx --trace-gc benchmark/index.ts` for each function of specific scheme would tell much more. + gotta increase the number of samples and run benchmarks on a separate device (due to me doing other stuff at the same time).
+
+
+
 # Implement indepdendent hash function implementations to replace `node:crypto`
 
 Targets:
