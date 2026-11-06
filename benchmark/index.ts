@@ -42,9 +42,9 @@ function measureFunction(
 
 
 //these numbers shoud be based on appropiate standard deviation
-const KEYGEN_SAMPLE_COUNT = 30;
-const SIGN_SAMPLE_COUNT = 30;
-const VERIFY_SAMPLE_COUNT = 30;
+const KEYGEN_SAMPLE_COUNT = 100;
+const SIGN_SAMPLE_COUNT = 100;
+const VERIFY_SAMPLE_COUNT = 100;
 const MESSAGE = new TextEncoder().encode("Hello Sphincs Benchmark!!!");
 const RESULTS_FILEPATH = "./results.csv";
 
@@ -83,6 +83,9 @@ function measureLocalSphincs(title : string, scheme : any){
 //clean results
 writeFileSync(RESULTS_FILEPATH, "");
 
+//register start time
+appendFileSync(RESULTS_FILEPATH, "start;" + process.hrtime.bigint().toString() + "\n", "utf-8");
+
 //sha2
 measureLocalSphincs("sha2-128s", slh_dsa_sha2_128s);
 measureLocalSphincs("sha2-128f", slh_dsa_sha2_128f);
@@ -98,3 +101,6 @@ measureLocalSphincs("shake-192s", slh_dsa_shake_192s);
 measureLocalSphincs("shake-192f", slh_dsa_shake_192f);
 measureLocalSphincs("shake-256s", slh_dsa_shake_256s);
 measureLocalSphincs("shake-256f", slh_dsa_shake_256f);
+
+//register end time
+appendFileSync(RESULTS_FILEPATH, "end;" + process.hrtime.bigint().toString() + "\n", "utf-8");
